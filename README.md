@@ -21,7 +21,7 @@
     * `DStars_client_patch_zh-cn_1_P.PAK`：UI、武器等客户端核心资产文本。
     * `DStars_font_zh-cn_1_P.pak`：**简中字库补丁**（换全覆盖泛 CJK 圆体，解决简体专用字不显示 + 文字下沉）。
     * `DStars_maps_zh-cn_9_P.pak`：**地图/区域/传送点/NPC名 等文本表补全**（修复大量 blank / `NotFoundZoneName`）。
-* `server-patch/`：服务端汉化补丁（master-data）：`loc.json` / `texts.json`。
+* `server-patch/`：服务端汉化补丁（master-data）：`texts.json`（部署到 `Binaries/Win64/`，由 Hoshi.dll 读取注入）。
 * `tools/`：维护者用的构建工具（见文末）。
 * `deploy.bat`：一键部署向导。
 
@@ -44,8 +44,10 @@
 > ⚠️ **每个 `.pak` 都必须有同名 `.sig`**。`.sig` 内容不会被校验（dinput8.dll 已绕过签名内容校验），
 > 但引擎要求 `.sig` 文件存在才会挂载该 `.pak`。任意一个有效的 564B `.sig` 改成对应包名即可。
 
-#### 2. 服务端补丁安装
-* 将 `server-patch/loc.json` 替换至本地服务端指定的汉化数据目录中（或者如果是其他本地 Patcher，可以直接将 `server-patch` 文件夹放在 patcher 运行工具的同级目录）。
+#### 2. 服务端补丁安装（master-data）
+* 将 `server-patch/texts.json` 复制到游戏 `...\BLUEPROTOCOL\BLUEPROTOCOL\Binaries\Win64\`（由 Hoshi.dll 读取注入 master-data）；
+  若用其他本地 Patcher，可把 `server-patch` 文件夹放在 patcher 工具同级目录。
+  *(`deploy.bat` 已自动完成此步)*
 
 ---
 
