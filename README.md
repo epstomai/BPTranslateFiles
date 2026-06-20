@@ -22,6 +22,7 @@
     * **简中字库**（源泉圆体，解决简体专用字不显示 + 文字下沉）；
     * **地图 / 区域 / 传送点 / NPC名 文本表补全**（修复大量 blank / `NotFoundZoneName`）；
     * **设置 / 系统消息 文本表补全**（修复设置菜单 blank）。
+  * `optional/`：**可选 mod**（非汉化，`deploy.bat` 不会自动安装，按需手动启用，见文末）。
 * `server-patch/`：服务端汉化补丁（master-data）：`texts.json`（部署到 `Binaries/Win64/`，由 Hoshi.dll 读取注入）。
 * `tools/`：维护者用的构建工具（见文末）。
 * `deploy.bat`：一键部署向导。
@@ -51,6 +52,11 @@
 * 将 `server-patch/texts.json` 复制到游戏 `...\BLUEPROTOCOL\BLUEPROTOCOL\Binaries\Win64\`（由 Hoshi.dll 读取注入 master-data）；
   若用其他本地 Patcher，可把 `server-patch` 文件夹放在 patcher 工具同级目录。
   *(`deploy.bat` 已自动完成此步)*
+
+#### 3. 可选 mod（按需安装，**非汉化**）
+`client-patch/optional/` 下的 mod **不随 `deploy.bat` 自动安装**。想用就把对应 `.pak` + 同名 `.sig` 手动复制进游戏 `~mods`（与汉化包同目录）；不想用就不放，也可随时删除。
+
+* `DStars_skipintro_zh-cn_9_P.pak`：**跳过开场动画** —— 启动游戏跳过片头 LOGO/过场，直接进入。
 
 ---
 
