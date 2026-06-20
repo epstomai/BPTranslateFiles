@@ -24,6 +24,7 @@
 * `server-patch/`：服务端汉化补丁（master-data）：`texts.json`（部署到 `Binaries/Win64/`，由 Hoshi.dll 读取注入）。
 * `tools/`：维护者用的构建工具（见文末）。
 * `deploy.bat`：一键部署向导。
+* `restore_jp.bat`：**一键还原日文**（卸载汉化：移除三个汉化包+`.sig` 与 `texts.json`，恢复日文）。
 
 ---
 
@@ -31,6 +32,7 @@
 
 ### 使用一键部署工具
 * 推荐直接双击运行根目录下的 **`deploy.bat`**，按提示完成客户端补丁的自动安装（会复制 dinput8.dll 和 `~mods` 内全部 `.pak`/`.sig`）。
+* 想**还原日文 / 卸载汉化**：双击 **`restore_jp.bat`**，按提示移除三个汉化包+`.sig` 与 `texts.json`（保留无害的 dinput8.dll，可手删，重装汉化时仍需）。
 
 ### 手动安装说明
 
