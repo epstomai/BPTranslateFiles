@@ -17,10 +17,11 @@
 
 * `client-patch/`：客户端汉化补丁。
   * `Binaries/Win64/dinput8.dll`：绕过客户端签名校验的 DLL（**必需**，否则带 `.pak` 进游戏会闪退）。
-  * `Content/Paks/~mods/`：三个汉化 `.pak`，**每个都配同名 `.sig`，缺一不可**：
+  * `Content/Paks/~mods/`：四个汉化 `.pak`，**每个都配同名 `.sig`，缺一不可**：
     * `DStars_client_patch_zh-cn_1_P.PAK`：UI、武器等客户端核心资产文本。
     * `DStars_font_zh-cn_1_P.pak`：**简中字库补丁**（换全覆盖泛 CJK 圆体，解决简体专用字不显示 + 文字下沉）。
     * `DStars_maps_zh-cn_9_P.pak`：**地图/区域/传送点/NPC名 等文本表补全**（修复大量 blank / `NotFoundZoneName`）。
+    * `DStars_settings_zh-cn_9_P.pak`：**设置/系统消息 文本表补全**（修复设置菜单 blank：通用/画面设置、系统消息等）。
 * `server-patch/`：服务端汉化补丁（master-data）：`texts.json`（部署到 `Binaries/Win64/`，由 Hoshi.dll 读取注入）。
 * `tools/`：维护者用的构建工具（见文末）。
 * `deploy.bat`：一键部署向导。

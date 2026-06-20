@@ -41,7 +41,7 @@ set "WIN64=%GAME_PATH%\Binaries\Win64"
 
 :: 1. 删除三个汉化 pak 及其 .sig (只删本汉化的, 不动你的其他 mod)
 echo 正在移除 简中汉化 PAK / .sig...
-for %%F in (DStars_client_patch_zh-cn_1_P DStars_font_zh-cn_1_P DStars_maps_zh-cn_9_P) do (
+for %%F in (DStars_client_patch_zh-cn_1_P DStars_font_zh-cn_1_P DStars_maps_zh-cn_9_P DStars_settings_zh-cn_9_P) do (
     if exist "%MODS%\%%F.PAK" del /f /q "%MODS%\%%F.PAK"
     if exist "%MODS%\%%F.pak" del /f /q "%MODS%\%%F.pak"
     if exist "%MODS%\%%F.sig" del /f /q "%MODS%\%%F.sig"
