@@ -91,3 +91,9 @@ AdventureBoard / TutorialHelp / LibraryEnemyDesc / InteractNotice / MyCharacterM
 并入已有译文 → **二进制原地等长替换**（中文≤日文则补空格，更长则暂留日文；**关键：保持 uexp 字节数不变**，
 否则破坏 `SBTextTableAsset` 结构、游戏不认——UAssetAPI `fromjson` 会改坏此类资产，务必避开）→ 打包。
 > 译名风格：有词义意译，纯造名才音译且挑顺口的字、不加间隔号。
+
+---
+
+## Screenshots
+<img width="1168" height="342" alt="G2TBY8MF)SP 6OCR IWB%19" src="https://github.com/user-attachments/assets/4cae0cb7-7c96-426e-b365-e686f6e150a5" />
+<img width="1171" height="943" alt="CM4 _A~FDLYM_E27IAZ_`_6" src="https://github.com/user-attachments/assets/37c04681-544f-47a8-92c8-d23cf0f6f2be" />
