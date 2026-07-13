@@ -78,6 +78,10 @@
 AdventureBoard / TutorialHelp / LibraryEnemyDesc / InteractNotice / MyCharacterMenu` 等表
 **用官方完整表打底 + 并入译文**重建，blank 全部消除。
 
+### 3. 修复启动时的 Translation patch / Error 误报
+修复 `dinput8.dll` 第二阶段兼容扫描误判失败后弹窗的问题。必要的第一阶段补丁及其真实失败提示仍然保留，
+正常启动时不再出现对游戏和汉化没有实际影响的 `Translation patch: Error` 弹窗。
+
 ---
 
 ## 🛠 维护者：构建工具与注意事项
