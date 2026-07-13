@@ -33,7 +33,9 @@
 ## 🚀 安装与使用指南
 
 ### 使用一键部署工具
-* 推荐直接双击运行根目录下的 **`deploy.bat`**，按提示完成客户端补丁的自动安装（会复制 dinput8.dll 和 `~mods` 内全部 `.pak`/`.sig`）。
+* 请先**完整解压整个补丁包**，并保持 `deploy.bat`、`deploy.ps1`、`client-patch/`、`server-patch/` 的相对位置不变。
+* 推荐直接双击根目录下的 **`deploy.bat`**。脚本会自动定位游戏、检查补丁文件和 `.pak`/`.sig` 配对，并验证复制结果；如无法自动定位，也可把游戏目录或 `BLUEPROTOCOL-Win64-Shipping.exe` 拖到 `deploy.bat` 上运行。
+* 游戏目录需要管理员权限时，脚本会自动弹出 Windows 权限确认；会复制 dinput8.dll 和 `~mods` 内全部 `.pak`/`.sig`。
 * 想**还原日文 / 卸载汉化**：双击 **`restore_jp.bat`**，按提示移除三个汉化包+`.sig` 与 `texts.json`（保留无害的 dinput8.dll，可手删，重装汉化时仍需）。
 
 ### 手动安装说明
