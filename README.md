@@ -9,7 +9,10 @@
 特别感谢以下项目和作者在技术架构上的支持：
 * **[mountaindewritos/BPTranslateFiles](https://github.com/mountaindewritos/BPTranslateFiles/)**：本项目参考了其补丁的打包架构与目录结构（如挂载注入文件）。
 * **Dewritos & mce & Team Blast**：感谢他们在解包/打包及服务器补丁挂载技术上提供的杰出方案。
-* 字库使用 **[ButTaiwan/源泉圆体 GenSenRounded](https://github.com/ButTaiwan/gensen-font)**（SIL OFL）。
+* 字库按原版三套日文风格分脸替换，均可商用再分发：
+  **[ButTaiwan/源泉圆体 GenSenRounded](https://github.com/ButTaiwan/gensen-font)**（主 UI / 对话圆体，SIL OFL）、
+  **[狮尾四季春加糖 Swei Spring Sugar](https://github.com/max32002/swei-spring)**（标题/按钮，SIL OFL）、
+  **[Noto Sans SC](https://github.com/notofonts/noto-cjk)** / 思源黑体（正文角黑 wght 415 + 字面放大，SIL OFL）。
 
 ---
 
@@ -19,7 +22,7 @@
   * `Binaries/Win64/dinput8.dll`：绕过客户端签名校验的 DLL（**必需**，否则带 `.pak` 进游戏会闪退）。
   * `Content/Paks/~mods/DStars_zh-cn_9_P.pak`（+同名 `.sig`，**缺 `.sig` 进游戏会闪退**）：**单一汉化包**，整合了：
     * UI / 武器等客户端核心资产文本；
-    * **简中字库**（源泉圆体，解决简体专用字不显示 + 文字下沉）；
+    * **简中字库**（主 UI 源泉圆体 / 标题狮尾四季春加糖 / 正文 Noto 黑体 415，解决简体专用字不显示 + 文字下沉）；
     * **地图 / 区域 / 传送点 / NPC名 文本表补全**（修复大量 blank / `NotFoundZoneName`）；
     * **设置 / 系统消息 文本表补全**（修复设置菜单 blank）。
   * `optional/`：**可选 mod**（非汉化，`deploy.bat` 不会自动安装，按需手动启用，见文末）。
@@ -65,9 +68,10 @@
 ## 🆕 本次更新内容
 
 ### 1. 简中字库（字体）
-原版 UI 用日文字体（Fontworks Seurat 等），**简体专用字（们/这/说/电/开/戏…）没有字形，直接不显示**；
-直接换字体又会因竖直度量不同导致**文字在按钮里下沉、被裁切**。本补丁把 3 个日文复合字体的主脸换成
-**源泉圆体 GenSenRounded2（圆体，最贴原版观感，覆盖简中+日文）**，并把字体竖直度量对齐原字体，解决缺字与下沉。
+原版 UI 用三套日文 CJK 字体（Fontworks Seurat 丸ゴ / Skip 标题软方 / UDKakugo 角ゴ），
+**简体专用字（们/这/说/电/开/戏…）没有字形，直接不显示**；直接换字体又会因竖直度量不同导致
+**文字在按钮里下沉、被裁切**。本补丁按风格分脸替换，并把竖直度量对齐各原字体：
+主 UI / 对话 → **源泉圆体**，标题/按钮 → **狮尾四季春加糖 Bold**，正文角黑 → **Noto/思源黑体 wght 415**（字面放大贴原版间距）。
 重建工具与全部要点见 `tools/replace_font.py`。
 
 ### 2. 地图/区域/NPC/提示等文本补全（修 blank）
@@ -87,9 +91,12 @@ AdventureBoard / TutorialHelp / LibraryEnemyDesc / InteractNotice / MyCharacterM
 ## 🛠 维护者：构建工具与注意事项
 
 ### 字体替换 `tools/replace_font.py`
-重建简中字库包：先用 repak+AES 把 3 个原始字体脸抽到 `tools/orig/`，源字体放 `tools/src/`，然后
-`python tools/replace_font.py [--deploy <游戏~mods目录>]`。脚本头部记录了全部踩坑要点（务必读）：
-`.ufont` 整文件读取、下沉真凶是 `head.yMax/yMin`、CFF 字体保存须 `recalcBBoxes=False`、每包须配 `.sig`。
+重建简中字库包：先用 repak+AES 把 3 个原始字体脸抽到 `tools/orig/`，源字体放 `tools/src/`
+（源泉圆体 Medium / 狮尾四季春加糖 Bold / Noto Sans SC），然后
+`python tools/replace_font.py [--deploy <游戏~mods目录>]`。
+独立包文件名必须排在 `DStars_zh-cn_9_P.pak` 之后（默认 `DStars_zh-cn_fonts_9_P.pak`），否则会被主包旧字库盖住。
+脚本头部记录了全部踩坑要点（务必读）：`.ufont` 整文件读取、下沉真凶是 `head.yMax/yMin`、
+CFF 字体保存须 `recalcBBoxes=False`、每包须配 `.sig`。
 
 ### ⚠️ 打文本表包的铁律（避免再出 blank）
 **必须从"官方完整表"出发、就地把日文替换成中文重建表，绝不能"导出已译条目再打包"**
