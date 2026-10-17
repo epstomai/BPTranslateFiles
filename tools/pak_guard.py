@@ -17,6 +17,10 @@ import tempfile
 
 TAG = 0x9E2A83C1
 EXPORT_ENTRY_SIZE = 104
+# SBTextTableAsset .uexp: the first property tag Size (int32 @16) always equals len(uexp) - 49.
+# If it lags behind a grown string, the loader stops short and reports "Serial size mismatch".
+TEXT_TAG_SIZE_POS = 16
+TEXT_TAG_GAP = 49
 PKG_FILTER_EDITOR_ONLY = 0x80000000
 REPAK = os.path.expanduser(r"~/.cargo/bin/repak.exe")
 
@@ -117,6 +121,17 @@ def inspect(uasset, uexp):
     return expected, actual, info
 
 
+def is_text_table(path):
+    return os.sep + "Text" + os.sep in os.path.normpath(path)
+
+
+def text_tag_size(uexp):
+    if len(uexp) < TEXT_TAG_SIZE_POS + 4:
+        return None, None
+    have = struct.unpack_from("<i", uexp, TEXT_TAG_SIZE_POS)[0]
+    return have, len(uexp) - TEXT_TAG_GAP
+
+
 def pairs(root):
     for base, _, files in os.walk(root):
         for name in files:
@@ -133,11 +148,15 @@ def check_dir(root):
     for ua, ux in pairs(root):
         n += 1
         rel = os.path.relpath(ua, root)
+        uexp = open(ux, "rb").read()
         try:
-            expected, actual, info = inspect(open(ua, "rb").read(), open(ux, "rb").read())
+            expected, actual, info = inspect(open(ua, "rb").read(), uexp)
         except ValueError as e:
             bad.append("%s: %s" % (rel, e))
             continue
+        have, want = text_tag_size(uexp) if is_text_table(ux) else (None, None)
+        if have is not None and have != want:
+            bad.append("%s: text tag Size %d, payload needs %d" % (rel, have, want))
         if expected != actual:
             last = max(info["exports"], key=lambda e: e["offset"])
             bad.append("%s: Got %d, Expected %d" % (rel, last["size"] + actual - expected, last["size"]))
@@ -151,6 +170,13 @@ def fix_dir(root):
     for ua, ux in pairs(root):
         uasset = bytearray(open(ua, "rb").read())
         uexp = open(ux, "rb").read()
+        have, want = text_tag_size(uexp) if is_text_table(ux) else (None, None)
+        if have is not None and have != want:
+            patched = bytearray(uexp)
+            struct.pack_into("<i", patched, TEXT_TAG_SIZE_POS, want)
+            uexp = bytes(patched)
+            open(ux, "wb").write(uexp)
+            fixed.append("%s: text tag Size %d -> %d" % (os.path.relpath(ux, root), have, want))
         expected, actual, info = inspect(bytes(uasset), uexp)
         if expected == actual and info["bulk"] == actual:
             continue
