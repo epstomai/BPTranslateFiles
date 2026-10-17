@@ -104,6 +104,14 @@ CFF 字体保存须 `recalcBBoxes=False`、每包须配 `.sig`。
 （那样会丢未译条目 → 引擎查不到 → blank / NotFound）。做法：repak 抽官方完整 `.uasset/.uexp` →
 并入已有译文 → **二进制原地等长替换**（中文≤日文则补空格，更长则暂留日文；**关键：保持 uexp 字节数不变**，
 否则破坏 `SBTextTableAsset` 结构、游戏不认——UAssetAPI `fromjson` 会改坏此类资产，务必避开）→ 打包。
+
+**确需改变长度时**（如职业名「元素法师」比原槽位长），改完 `.uexp` 后必须同步 `.uasset` 导出表的 `SerialSize`
+与 `BulkDataStartOffset`，否则启动报 `Serial size mismatch: Got X, Expected Y` 直接退出：
+```
+python tools/pak_guard.py fix <解包目录>     # 按 .uexp 实际长度改写 .uasset
+python tools/pak_guard.py check <pak或目录>  # 打包后复查，有问题返回非 0
+```
+仓库的 pre-commit 钩子会对暂存的 `.pak` 跑 `check`，不通过拒绝提交。
 > 译名风格：有词义意译，纯造名才音译且挑顺口的字、不加间隔号。
 
 ---
