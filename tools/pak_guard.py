@@ -132,6 +132,116 @@ def text_tag_size(uexp):
     return have, len(uexp) - TEXT_TAG_GAP
 
 
+NATIVE_STRUCTS = {
+    "Vector", "Rotator", "Guid", "LinearColor", "Color", "Vector2D", "IntPoint", "DateTime",
+    "Timespan", "SoftObjectPath", "GameplayTagContainer", "Quat",
+}
+
+
+def name_map(uasset):
+    r = Reader(uasset)
+    r.skip(4 + 4 + 4 + 4 + 4)
+    r.skip(r.i32() * 20)  # custom versions
+    r.skip(4)  # total header
+    r.fstring()  # folder name
+    r.skip(4)  # flags
+    count, offset = r.i32(), r.i32()
+    r.p = offset
+    names = []
+    for _ in range(count):
+        n = r.i32()
+        if n >= 0:
+            names.append(uasset[r.p:r.p + max(n - 1, 0)].decode("latin-1"))
+            r.p += n
+        else:
+            names.append(uasset[r.p:r.p - n * 2 - 2].decode("utf-16le"))
+            r.p += -n * 2
+        r.skip(4)  # hashes
+    return names
+
+
+class TagWalker:
+    """Walk cooked tagged properties and insist that every Size matches the bytes it covers.
+
+    Growing a string inside a text table must update the Size of the StrProperty, of the
+    TextTable array inner tag and of the TextTable property itself; a stale one makes the
+    loader read garbage ("破損データを検出しました" / Serial size mismatch)."""
+
+    def __init__(self, uexp, names):
+        self.d = uexp
+        self.names = names
+
+    def fname(self, p):
+        i, num = struct.unpack_from("<ii", self.d, p)
+        if not 0 <= i < len(self.names):
+            raise ValueError("bad FName index %d @%d" % (i, p))
+        return self.names[i] + ("_%d" % (num - 1) if num else ""), p + 8
+
+    def tag_header(self, p):
+        name, p = self.fname(p)
+        if name == "None":
+            return None, p
+        typ, p = self.fname(p)
+        size_pos = p
+        size = struct.unpack_from("<i", self.d, p)[0]
+        p += 8
+        inner = None
+        if typ == "StructProperty":
+            inner, p = self.fname(p)
+            p += 16
+        elif typ == "BoolProperty":
+            p += 1
+        elif typ in ("ByteProperty", "EnumProperty", "ArrayProperty", "SetProperty"):
+            inner, p = self.fname(p)
+        elif typ == "MapProperty":
+            inner, p = self.fname(p)
+            _, p = self.fname(p)
+        p += 1 + (16 if self.d[p] else 0)
+        return (name, typ, inner, size_pos, size), p
+
+    def tags(self, p, end=None):
+        while True:
+            tag, p = self.tag_header(p)
+            if tag is None:
+                if end is not None and p != end:
+                    raise ValueError("struct ends at %d, Size says %d" % (p, end))
+                return p
+            name, typ, inner, size_pos, size = tag
+            start = p
+            stop = start + size
+            if stop > len(self.d):
+                raise ValueError("%s Size@%d runs past end" % (name, size_pos))
+            if typ == "StrProperty":
+                n = struct.unpack_from("<i", self.d, start)[0]
+                need = 4 + (n if n >= 0 else -n * 2)
+                if need != size:
+                    raise ValueError("StrProperty %s Size@%d is %d, string needs %d" % (name, size_pos, size, need))
+            elif typ == "StructProperty" and inner not in NATIVE_STRUCTS:
+                self.tags(start, stop)
+            elif typ == "ArrayProperty" and inner == "StructProperty":
+                count = struct.unpack_from("<i", self.d, start)[0]
+                itag, q = self.tag_header(start + 4)
+                if itag is None:
+                    raise ValueError("%s array missing inner tag" % name)
+                istop = q + itag[4]
+                for _ in range(count):
+                    q = self.tags(q)
+                if q != istop or istop != stop:
+                    raise ValueError("%s array elements end at %d, inner Size@%d says %d, outer Size@%d says %d"
+                                     % (name, q, itag[3], istop, size_pos, stop))
+            p = stop
+
+
+def text_layout_error(uasset, uexp):
+    try:
+        end = TagWalker(uexp, name_map(uasset)).tags(0)
+    except (ValueError, struct.error, IndexError) as e:
+        return str(e)
+    if end + 8 != len(uexp):
+        return "properties end at %d, uexp is %d" % (end, len(uexp))
+    return None
+
+
 def pairs(root):
     for base, _, files in os.walk(root):
         for name in files:
@@ -157,6 +267,10 @@ def check_dir(root):
         have, want = text_tag_size(uexp) if is_text_table(ux) else (None, None)
         if have is not None and have != want:
             bad.append("%s: text tag Size %d, payload needs %d" % (rel, have, want))
+        if have is not None:
+            err = text_layout_error(open(ua, "rb").read(), uexp)
+            if err:
+                bad.append("%s: %s" % (rel, err))
         if expected != actual:
             last = max(info["exports"], key=lambda e: e["offset"])
             bad.append("%s: Got %d, Expected %d" % (rel, last["size"] + actual - expected, last["size"]))
