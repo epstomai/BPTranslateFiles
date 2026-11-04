@@ -2,7 +2,7 @@
 
 本项目是针对 Blue Protocol 客户端与服务端制作的简体中文本地化版本，旨在为玩家提供自然、地道的简体中文剧情与文本体验。
 
-本项目的本地化工作直接基于日文原版文本进行翻译与精校，使用了GPT5.5、Opus4.8、Grok4.7、Gemini4Argon、Opus5.5进行翻译，校对。
+本项目的本地化工作直接基于日文原版文本进行翻译与精校，使用了GPT5.5、Opus4.8、Grok4.7、Gemini4 Argon、Opus5.5进行翻译，校对。
 
 ## 致谢 (Acknowledgements)
 
